@@ -30,7 +30,21 @@ Plug 'tpope/vim-endwise', {'commit': '0067ceda37725d01b7bd5bf249d63b1b5d4e2ab4',
 " Git helpers
 Plug 'tpope/vim-fugitive', {'commit': '008b9570860f552534109b4f618cf2ddd145eeb4'}
 
+" Syntax checker
+Plug 'vim-syntastic/syntastic', {'tag': 'v0.5.7'}
+
+" Project-wide search and replace
+Plug 'brooth/far.vim'
+
+" Code navigation for starscope
+Plug 'Shougo/unite.vim'
+Plug 'devjoe/vim-codequery'
+
 call plug#end()
+
+" Syntax highlighting for ejs
+" https://stackoverflow.com/questions/4597721/syntax-highlight-for-ejs-files-in-vim
+au BufNewFile,BufRead *.ejs set filetype=html
 
 "
 " Vim Settings
@@ -55,6 +69,13 @@ set shiftwidth=2
 set softtabstop=2
 " Use spaces instead of tabs
 set expandtab
+" Disable mouse click to go to position
+set mouse-=a
+" Highlight the current line
+set cursorline
+" Show “invisible” characters
+set lcs=tab:▸\ ,trail:·,eol:¬,nbsp:_
+set list
 " [SEARCH]
 " The Vim editor will start searching when you type the first character of the
 " search string. As you type in more characters, the search is refined.
@@ -102,7 +123,15 @@ set undodir=~/.config/nvim/undodir
 set undofile
 set undoreload=10000
 " Key Mappings
+" <Leader>CC comments the selected lines
 map <silent> <LocalLeader>cc :TComment<CR>
+" Run the current file with ruby
+map <LocalLeader>tt :!bundle exec ruby %<CR>
+" Search the 'app' folder in the project for the word under cursor
+map <LocalLeader>ss :F <C-R><C-W> app/**/*<CR>
+" Search the entire project folder for the word under cursor.
+" This can take a while if there is a node_modules folder present
+map <LocalLeader>sa :F <C-R><C-W> ./**/*<CR>
 " Colors
 if &t_Co == 256
   colorscheme jellybeans
@@ -131,7 +160,7 @@ let g:rubycomplete_classes_in_global = 1
 
 " Ctrl-P
 let g:ctrlp_custom_ignore = {
-  \ 'dir':  '\v[\/](node_modules|bower_components|cordova|tmp|\.git|\.tmp|log|source_maps|deps|_build)$',
+  \ 'dir':  '\v[\/](node_modules|bower_components|rel|cordova|tmp|\.git|\.tmp|log|source_maps|deps|_build)$',
   \ 'file': '\v[\/].(gif|ico|jpg|png|zip|eot|ttf|svg)$',
   \ 'link': ''
   \ }
@@ -146,4 +175,38 @@ map <C-S-k> :NERDTreeToggle<CR>
 " Close nt after opening a file
 let NERDTreeQuitOnOpen = 1
 let NERDTreeIgnore=['\.exc$', '\.pyc$', '\.o$', '\.class$']
+" Show hidden files
+let NERDTreeShowHidden=1
 
+" Window zooming - zooms vertically and horizontally
+" Use <C-w>= to go back to equal splits
+nnoremap <C-w>o <C-w><bar><C-w>_
+
+" Syntastic
+" Recommended syntastic settings
+set statusline+=%#warningmsg#
+" set statusline+=%{SyntasticStatuslineFlag()}
+set statusline+=%*
+
+let g:syntastic_always_populate_loc_list = 1
+let g:syntastic_auto_loc_list = 1
+let g:syntastic_check_on_open = 1
+let g:syntastic_check_on_wq = 0
+" Make sytastic use eslint config files for linting
+let g:syntastic_javascript_checkers = ['eslint']
+" Use the project-specific binary of eslint
+let g:syntastic_javascript_eslint_exe='$(npm bin)/eslint'
+" Automatically format on save
+" autocmd bufwritepost *.js silent !standard --fix %
+" autocmd bufwritepost *.jsx silent !standard --fix %
+" Sytastic autofix
+" let g:syntastic_javascript_eslint_args = ['--fix']
+" " enable autoread to reload any files from files when checktime is called and
+" " the file is changed
+" set autoread
+
+" CodeQuery
+" Search for method definitions
+" nnoremap <space>s :CodeQuery Symbol<CR>
+" nnoremap <space>d :CodeQuery Definition<CR>
+" nnoremap <space>c :CodeQuery Caller<CR>
